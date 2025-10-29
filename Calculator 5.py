@@ -501,10 +501,12 @@ while True:
 
     #Random sayings
     def randomSayings():
-        count = 0
-        while count < 50:
+        count = int(input("How many? "))
+        global count2
+        count2 = 0
+        while count2 < count:
             loading()
-            count += 1
+            count2 += 1
         return 0
 
     #IN to CM
@@ -776,11 +778,24 @@ while True:
         time.sleep(2)
         
     def jokes():
+        while True:
+            try:
+                count = int(input("How many jokes would you like? "))
+                break
+            except:
+                print("Please input a intager!!!")
+                time.sleep(2)
+                input("Press enter to continue...")
+                time.sleep(2)
         try:
             with open(resource_path("jokes.txt"), "r", encoding="utf-8", errors="ignore") as file:
                 joke = file.read().split("\n")
-                ranJoke = random.choice(joke)
-                print(ranJoke)
+                count2 = 0
+                while count2 < count:
+                    ranJoke = random.choice(joke)
+                    print(ranJoke)
+                    time.sleep(5)
+                    count2 += 1
         except FileNotFoundError:
             print("Error!")
         time.sleep(5)
@@ -913,8 +928,15 @@ while True:
                         
                         
                 else:
-                    randomNumberChoice = int(input("Select 1 for your own numbers and 2 for random numbers: "))
-                    noNum = True
+                    while True:
+                        try:
+                            randomNumberChoice = int(input("Select 1 for your own numbers and 2 for random numbers: "))
+                            noNum = True
+                            break
+                        except:
+                            print("Not an option!!!")
+                            time.sleep(2)
+                            input("Press enter to continue...")
         else:
             clearShell()
             print("Not an option!!!")
@@ -927,7 +949,7 @@ while True:
                 def numberChoice(randomNumberChoice):
                     global num1, num2
                     if randomNumberChoice == 1:
-                        if not num1NotNeeded:
+                        if num1NotNeeded:
                             while True:
                                 try:
                                     num1 = float(input("Enter your first number: "))
