@@ -783,7 +783,7 @@ while True:
                 print(ranJoke)
         except FileNotFoundError:
             print("Error!")
-        time.sleep(2)
+        time.sleep(5)
 
     def signedIn():
         print(f"{username} is currently logged in!")
@@ -963,7 +963,7 @@ while True:
             
 
             #Only clear screen if needed
-            if choice not in (46,45,44,43,42,47,48,49,50,51,52):
+            if choice not in (30,46,45,44,43,42,47,48,49,50,51,52):
                 clearShell()
 
             #Only ask if want to round/format and print total if needed
