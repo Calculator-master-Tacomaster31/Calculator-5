@@ -503,9 +503,33 @@ while True:
     def randomSayings():
         count = int(input("How many? "))
         global count2
+        while True:
+            try:
+                timesleepYes = input("Do you want to hit enter after every random saying? (Yes/No)").lower()
+                break
+            except:
+                print("Not an option!!!")
+                time.sleep(2)
+                input("Press enter to continue...")
+        if timesleepYes == 'yes':
+            timesleep2 = False
+        elif timesleepYes == 'no':
+            while True:
+                try:
+                    timesleep = float(input("How many seconds would you like to wait between each random saying? "))
+                    break
+                except:
+                    print("Not an option!!!")
+                    time.sleep(2)
+                    input("Press enter to continue...")
+            timesleep2 = True
         count2 = 0
         while count2 < count:
             loading()
+            if timesleep2:
+                time.sleep(timesleep)
+            if not timesleep2:
+                input("Press enter to continue...")
             count2 += 1
         return 0
 
@@ -787,6 +811,26 @@ while True:
                 time.sleep(2)
                 input("Press enter to continue...")
                 time.sleep(2)
+        while True:
+            try:
+                timesleepYes = input("Dou you want to press enter every joke? (Yes/No)").lower
+                break
+            except:
+                print("Not an option!!!")
+                time.sleep(2)
+                input("Press enter to continue...")
+        if timesleepYes == 'yes':
+            timesleep2 = False
+        elif timesleepYes == 'no':
+            while True:
+                try:
+                    timesleep = float(input("How many seconds would you like between each joke? "))
+                    break
+                except:
+                    print("Not an option!!!")
+                    time.sleep(2)
+                    input("Press enter to continue...")
+            timesleep2 = True
         try:
             with open(resource_path("jokes.txt"), "r", encoding="utf-8", errors="ignore") as file:
                 joke = file.read().split("\n")
@@ -794,7 +838,10 @@ while True:
                 while count2 < count:
                     ranJoke = random.choice(joke)
                     print(ranJoke)
-                    time.sleep(5)
+                    if timesleep2:
+                        time.sleep(timesleep)
+                    if not timesleep2:
+                        input("Press enter to continue...")
                     count2 += 1
         except FileNotFoundError:
             print("Error!")
