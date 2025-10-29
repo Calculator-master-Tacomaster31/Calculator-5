@@ -813,7 +813,7 @@ while True:
                 time.sleep(2)
         while True:
             try:
-                timesleepYes = input("Dou you want to press enter every joke? (Yes/No)").lower
+                timesleepYes = input("Dou you want to press enter every joke? (Yes/No)").lower()
                 break
             except:
                 print("Not an option!!!")
