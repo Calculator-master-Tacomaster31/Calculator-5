@@ -517,7 +517,8 @@ while True:
             while True:
                 try:
                     timesleep = float(input("How many seconds would you like to wait between each random saying? "))
-                    break
+                    if timesleep > 0:
+                        break
                 except:
                     print("Not an option!!!")
                     time.sleep(2)
@@ -825,7 +826,8 @@ while True:
             while True:
                 try:
                     timesleep = float(input("How many seconds would you like between each joke? "))
-                    break
+                    if timesleep > 0:
+                        break
                 except:
                     print("Not an option!!!")
                     time.sleep(2)
