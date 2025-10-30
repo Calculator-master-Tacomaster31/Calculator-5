@@ -4,8 +4,7 @@ import sys
 
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2 import id_token
-from google.auth.transport import requests
-
+from google.auth.transport import requests as google_requests
 global passYes, username
 
 import requests
@@ -15,7 +14,7 @@ import zipfile
 import io
 import shutil
 
-CURRENT_VERSION = "V0.3.0"
+CURRENT_VERSION = "V0.3.1"
 GITHUB_API_RELEASES = "https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest"
 
 def check_for_update():
@@ -62,7 +61,7 @@ def google_sign_in():
         port=0,
         authorization_prompt_message="",
         )
-    id_info = id_token.verify_oauth2_token(creds.id_token, requests.Request())
+    id_info = id_token.verify_oauth2_token(creds.id_token, google_requests.Request())
     email = id_info['email']
     print(f"\nSuccessfully signed in as: {email}\n")
     username = email
