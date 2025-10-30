@@ -1,10 +1,10 @@
 import requests
 import webbrowser
 
-# CURRENT VERSION OF YOUR CALCULATOR
-CURRENT_VERSION = "V0.3.2"  # change this every time you release a new version
+#Auto update
+CURRENT_VERSION = "V0.3.2"  #Version number
 
-# GITHUB RELEASES URL (your link)
+#GITHUB RELEASES URL
 GITHUB_API_RELEASES = "https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest"
 
 def check_for_update():
@@ -14,16 +14,25 @@ def check_for_update():
         if response.status_code != 200:
             print(f"Failed to fetch release info! Status code: {response.status_code}")
             return
+        #Find newest version
         data = response.json()
         latest_version = data.get("tag_name")
         if latest_version is None:
             print("Could not determine latest version.")
             return
 
+        #Check if current version is the same as the newest version
         if latest_version != CURRENT_VERSION:
             print(f"New version available: {latest_version} (You have {CURRENT_VERSION})")
-            choice = input("Do you want to open the release page to download it? (y/n): ").lower()
-            if choice == "y":
+            while True:
+                try:
+                    choice = input("Do you want to open the release page to download it? (Yes/No): ").lower()
+                    break
+                except:
+                    print("Not an option!!!")
+                    time.sleep(2)
+                    input("Press enter to continue...")
+            if choice == "yes":
                 release_url = data.get("html_url")
                 if release_url:
                     webbrowser.open(release_url)
@@ -34,7 +43,7 @@ def check_for_update():
     except Exception as e:
         print(f"Update check failed: {e}")
 
-# Call this function at the start of your program
+#Call function
 check_for_update()
 
 import os
