@@ -1,3 +1,4 @@
+
 import os
 import sys
 
@@ -6,6 +7,48 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 
 global passYes, username
+
+import requests
+import os
+import sys
+import zipfile
+import io
+import shutil
+
+CURRENT_VERSION = "V0.3.0"
+GITHUB_API_RELEASES = "https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest"
+
+def check_for_update():
+    try:
+        r = requests.get(GITHUB_API_RELEASES)
+        data = r.json()
+        latest_version = data['tag_name']  # e.g., "v1.1.0"
+        if latest_version != CURRENT_VERSION:
+            print(f"Update available: {latest_version} (you have {CURRENT_VERSION})")
+            choice = input("Do you want to update now? (yes/no) ").lower()
+            if choice == "yes":
+                download_update(data)
+        else:
+            print("You are up to date!")
+    except Exception as e:
+        print("Could not check for updates:", e)
+
+def download_update(release_data):
+    try:
+        # Assume the first asset is your zip
+        asset = release_data['assets'][0]
+        url = asset['browser_download_url']
+        r = requests.get(url)
+        with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+            # Extract to the current folder (overwrite)
+            for member in z.namelist():
+                z.extract(member, os.path.dirname(sys.argv[0]))
+        print("Update installed! Restarting...")
+        os.execv(sys.executable, ['python'] + sys.argv)  # restart script
+    except Exception as e:
+        print("Update failed:", e)
+
+check_for_update()
 
 def google_sign_in():
     global passYes, username
