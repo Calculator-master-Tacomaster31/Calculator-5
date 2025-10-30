@@ -780,9 +780,9 @@ while True:
     def ASCIIart():
         try:
             with open(("ASCIIart.txt"), "r", encoding="utf-8") as file:
-                art_blocks = file.read().split('---')  # Split by your delimiter
+                art_blocks = file.read().rsplit('---')  # Split by your delimiter
                 art = random.choice(art_blocks)
-                print(art.strip())  # Remove extra blank lines
+                print(art.rstrip())  # Remove extra blank lines
                 time.sleep(2)
         except FileNotFoundError:
             print("ASCIIart.txt not found!")
