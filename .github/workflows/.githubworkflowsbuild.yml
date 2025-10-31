@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -28,12 +28,14 @@ jobs:
           pyinstaller "Calculator 5.py" --onefile --name Calculator
 
       - name: Move build output
+        shell: bash
         run: |
           mkdir -p ReleaseBuilds/${{ matrix.os }}
           mv dist/Calculator* ReleaseBuilds/${{ matrix.os }}/
 
+      # ✅ New artifact upload system (replaces old upload-artifact@v3)
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Calculator-${{ matrix.os }}
           path: ReleaseBuilds/${{ matrix.os }}
