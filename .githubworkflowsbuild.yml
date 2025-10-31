@@ -1,0 +1,48 @@
+name: Build Multi-OS Calculator
+
+on:
+  workflow_dispatch:  # allows manual trigger
+  push:
+    branches: [ main ]  # or your branch name
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install PyInstaller
+      run: pip install pyinstaller
+
+    - name: Build executable
+      run: |
+        pyinstaller --onefile "Calculator 5.py"
+      shell: bash
+
+    - name: Move build into the subfolder
+      run: |
+        mkdir -p "Calculator 5/ReleaseBuilds"
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          mv dist/"Calculator 5.exe" "Calculator 5/ReleaseBuilds/calculator-windows.exe"
+        elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+          mv dist/Calculator\ 5 "Calculator 5/ReleaseBuilds/calculator-linux"
+        else
+          mv dist/Calculator\ 5 "Calculator 5/ReleaseBuilds/calculator-macos"
+        fi
+      shell: bash
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: calculator-${{ matrix.os }}
+        path: "Calculator 5/ReleaseBuilds/"

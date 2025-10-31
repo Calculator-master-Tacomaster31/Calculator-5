@@ -2,7 +2,7 @@ import requests
 import webbrowser
 
 #Auto update
-CURRENT_VERSION = "V0.3.3"  #Version number
+CURRENT_VERSION = "V0.4.0"  #Version number
 
 #GITHUB RELEASES URL
 GITHUB_API_RELEASES = "https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest"
