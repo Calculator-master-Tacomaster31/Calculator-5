@@ -1,0 +1,39 @@
+name: Build Multi-OS Calculator
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyinstaller
+
+      - name: Build executable
+        run: |
+          pyinstaller "Calculator 5.py" --onefile --name Calculator
+
+      - name: Move build output
+        run: |
+          mkdir -p ReleaseBuilds/${{ matrix.os }}
+          mv dist/Calculator* ReleaseBuilds/${{ matrix.os }}/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: Calculator-${{ matrix.os }}
+          path: ReleaseBuilds/${{ matrix.os }}
