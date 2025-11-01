@@ -17,3 +17,6 @@ doble click icon on desktop every time you want to use calculator
 Click more info
 
 Click run anyway (This is not a virus)
+
+
+If you have any suggestions, please put them in the issues tab and I will think about adding them!
