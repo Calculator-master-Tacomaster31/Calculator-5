@@ -1,8 +1,16 @@
 import requests
 import webbrowser
+import os
+import sys
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import random
+import time
+import math
 
 #Auto update
-CURRENT_VERSION = "V0.4.0"  #Version number
+CURRENT_VERSION = "V0.4.1"  #Version number
 
 #GITHUB RELEASES URL
 GITHUB_API_RELEASES = "https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest"
@@ -26,7 +34,7 @@ def check_for_update():
             print(f"New version available: {latest_version} (You have {CURRENT_VERSION})")
             while True:
                 try:
-                    choice = input("Do you want to open the release page to download it? (Yes/No): ").lower()
+                    choice = input("Do you want to open Github to download it? ").lower()
                     break
                 except:
                     print("Not an option!!!")
@@ -37,21 +45,17 @@ def check_for_update():
                 if release_url:
                     webbrowser.open(release_url)
                 else:
-                    print("Could not find release page URL!")
+                    print("ERROR!")
         else:
             print("You are running the latest version.")
     except Exception as e:
         print(f"Update check failed: {e}")
 
-#Call function
-check_for_update()
+    return
 
-import os
-import sys
 
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
+
+
 global passYes, username
 
 def google_sign_in():
@@ -76,20 +80,16 @@ def google_sign_in():
 def resource_path(relative_path):
     #Get absolute path to resource, works for dev and PyInstaller exe
     try:
-        # PyInstaller stores temp files in _MEIPASS
         base_path = sys._MEIPASS
     except AttributeError:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
 #Imports
-import random
-import time
-import math
 
-# Determine a writable path for users.txt
+
+#Determine a writable path for users.txt
 def get_user_data_path():
-    # Store next to the exe or script
     base_path = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
     return os.path.join(base_path, "users.txt")
 
@@ -109,11 +109,13 @@ while True:
     #Define verable that desides if you are logged in or not
     passYes = False
 
+    choice = None
     #Code is approved by Malakai
-    print("This code is Malakai aproved as of 10/24/25!")
-    input("Press enter to continue...")
-    time.sleep(.5)
-    clearShell()
+    if choice != 51:
+        print("This code is Malakai aproved as of 10/24/25!")
+        input("Press enter to continue...")
+        time.sleep(.5)
+        clearShell()
 
     def googleSignIn():
         username = google_sign_in()
@@ -138,12 +140,13 @@ while True:
     while passYes == False:
         users = loadUsers()
         #Ask for username to login or signup
-        while True:
-            try:
-                loginType = int(input("Press 1 for login with Google\nPress 2 for login with Username\nSelection: "))
-                break
-            except:
-                print("Not an option!")
+        check_for_update()
+        clearShell()
+        try:
+            loginType = int(input("Press 1 for login with Google\nPress 2 for login with Username\nSelection: "))
+            break
+        except:
+            print("Not an option!")
         if loginType == 2:
             while True:
                 try:
@@ -164,11 +167,11 @@ while True:
                         time.sleep(2)
                         input("Press enter to continue...")
                 if users[username] == password:
-                    print("Login SUSSESFULL")
+                    print("Login SUCCESSFUL")
                     passYes = True
                     time.sleep(2)
                 else:
-                    print("Login UNSSESFULL")
+                    print("Login UNSUCCESSFUL")
                     passYes = False
                     time.sleep(2)
                     count = 0
@@ -249,8 +252,9 @@ while True:
         48: 'ASCII art',
         49: 'prime Checker',
         50: 'jokes',
-        51: 'Sign out',
-        52: 'Signed In',
+        51: 'Check for Updates',
+        52: 'Sign out',
+        53: 'Signed In',
         }
 
     #Define verables
@@ -861,7 +865,7 @@ while True:
                 time.sleep(2)
         while True:
             try:
-                timesleepYes = input("Dou you want to press enter every joke? (Yes/No)").lower()
+                timesleepYes = input("Dou you want to press enter every joke? ").lower()
                 break
             except:
                 print("Not an option!!!")
@@ -953,8 +957,9 @@ while True:
         48: ASCIIart,
         49: primeChecker,
         50: jokes,
-        51: signOut,
-        52: signedIn,
+        51: check_for_update,
+        52: signOut,
+        53: signedIn,
         }
 
     #Start all operation counters at 0
@@ -1098,8 +1103,8 @@ while True:
             #Save everything to dev history file
             devSaveResult(num1, num2, choice, total)
 
-            #Only count down if not viewing history
-            if choice != 41 and choice != 51:
+            #Only count down if not viewing history or logging out
+            if choice != 41 and choice != 52:
                 time.sleep(5)
                 countdownToSelection()
 
