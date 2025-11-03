@@ -4,37 +4,57 @@ import random
 import time
 import math
 import requests
+import platform
+import subprocess
+import socket
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
-global passYes, username
+codeRan = False
 
-# Clear shell
+#Clear shell
 def clearShell():
     count = 0
     while count < 100:
         print("\n")
         count += 1
 
+#Check to see is have wifi (Limited fetchers if none)
+def internet_check():
+    try:
+        #tries to reach Google DNS
+        socket.create_connection(("8.8.8.8", 53), timeout=2)
+        print("✅ Internet connection detected!")
+        return True
+    except OSError:
+        print("❌ No internet connection.")
+        return False
+#Check if have wifi (See above)  
+wifiConnect = internet_check()
+input("Press enter to continue...")
+
+clearShell()
+
+#Sign in with google option
 def google_sign_in():
     global passYes, username
     print("Opening browser for Google sign-in...")
     time.sleep(2)
     flow = InstalledAppFlow.from_client_secrets_file(
-        'client_secret.json',
+        'client_secret.json',    #Connect to google
         scopes=['openid', 'https://www.googleapis.com/auth/userinfo.email']
     )
-    creds = flow.run_local_server(
+    creds = flow.run_local_server(     #Tell google that this is a local sever
         port=0,
-        authorization_prompt_message="",
+        authorization_prompt_message="",   #Say nothing when opening
     )
     try:
-        id_info = id_token.verify_oauth2_token(creds.id_token, google_requests.Request())
+        id_info = id_token.verify_oauth2_token(creds.id_token, google_requests.Request())   #Google autherazion meathed
     except Exception as e:
         print(f"Error:\n{e}")
     try:
-        email = id_info['email']
+        email = id_info['email']   #Get email from google
     except Exception as e:
         print(f"Error:\n{e}")
     print(f"\nSuccessfully signed in as: {email}\n")
@@ -45,35 +65,42 @@ def google_sign_in():
 def resource_path(relative_path):
     # Get absolute path to resource, works for dev and PyInstaller exe
     try:
-        # PyInstaller stores temp files in _MEIPASS
+        #PyInstaller stores temp files in _MEIPASS
         base_path = sys._MEIPASS
     except AttributeError:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+#Check for updates from github
 def check_for_update():
     """Check GitHub releases for updates."""
     try:
+        print("🔍 Checking for updates...")
         response = requests.get("https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest")
         if response.status_code == 200:
             latest_version = response.json()["tag_name"]
-            current_version = "V1.0.0"  # your local version
+            current_version = "V1.0.0"  #Version number
             if latest_version != current_version:
-                print(f"New version {latest_version} available! (Your current version: {current_version})")
-                ask = input("Do you want to open the download page? (yes/no): ").lower()
+                print(f"🆕 New version {latest_version} available! (Your current version: {current_version})")
+                ask = input("Do you want to open the download page? (yes/no): ").lower()    #Ask if want to update
                 if ask == "yes":
-                    os.startfile("https://github.com/Calculator-master-Tacomaster31/Calculator-5/releases/latest")
+                    os.startfile("https://github.com/Calculator-master-Tacomaster31/Calculator-5/releases/latest")   #Link to latest version
                 else:
                     print("Continuing with current version...")
-                    input("Press enter to continue...")
-                    clearShell()
             else:
-                print("You are using the latest version.")
+                print("✅ You are using the latest version.")
         else:
-            print(f"Failed to fetch release info! Status code: {response.status_code}")
+            print(f"❌ Failed to fetch release info! Status code: {response.status_code}")
     except Exception as e:
-        print(f"Failed to check for updates: {e}")
-        input("Press enter to continue...")
+        print(f"⚠️ Failed to check for updates: {e}")
+    input("\nPress Enter to continue...")
+    time.sleep(1)
+    if codeRan == False:
+        clearShell()
+    if codeRan == True:
+        countdownToSelection()
+    return 0
+
 
 # Determine a writable path for users.txt
 def get_user_data_path():
@@ -96,10 +123,11 @@ while True:
     time.sleep(.5)
     clearShell()
 
+    #Set username as email
     def googleSignIn():
         username = google_sign_in()
 
-    # Load users from text file
+    #Load users from text file
     def loadUsers():
         users = {}
         file_path = get_user_data_path()
@@ -112,24 +140,82 @@ while True:
             open(file_path, "w").close()
         return users
 
-    # Create new user
+    #Create new user
     def newUser(username, newPassword):
         file_path = get_user_data_path()
         with open(file_path, "a") as file:
             file.write(f"{username}:{newPassword}\n")
 
-    check_for_update()
+    #Only check for updates if have wifi
+    if wifiConnect == True:
+        check_for_update()
+    elif wifiConnect == False:
+        print("No wifi found!\nCannot check for updates!")
+        input("Press enter to continue...")
 
+    #Signin only if not already
     while passYes == False:
         users = loadUsers()
         # Ask for username to login or signup
-        while True:
-            try:
-                loginType = int(input("Press 1 for login with Google\nPress 2 for login with Username\nSelection: "))
-                break
-            except:
-                print("Not an option!")
-        if loginType == 2:
+        if wifiConnect == True:
+            while True:
+                try:
+                    loginType = int(input("Press 1 for login with Google\nPress 2 for login with Username\nSelection: "))
+                    break
+                except:
+                    print("Not an option!")
+            if loginType == 2:
+                while True:
+                    try:
+                        username = input("Enter username: ")
+                        break
+                    except:
+                        print("Not an option!!!")
+                        time.sleep(2)
+                        input("Press enter to continue...")
+                if username in users:
+                    # Enter password
+                    while True:
+                        try:
+                            password = input("Enter your password ")
+                            break
+                        except:
+                            print("Not an option!!!")
+                            time.sleep(2)
+                            input("Press enter to continue...")
+                    if users[username] == password:
+                        print("Login SUSSESFULL")
+                        passYes = True
+                        time.sleep(2)
+                    else:
+                        print("Login UNSSESFULL")
+                        passYes = False
+                        time.sleep(2)
+                        count = 0
+                        while count < 2:
+                            print("\n")
+                            count += 1
+                else:
+                    print("User name not found")
+                    time.sleep(1.2)
+                    while True:
+                        try:
+                            create = input("Do you want a new account? ").lower()
+                            break
+                        except:
+                            print("Not an option!!!")
+                            time.sleep(2)
+                            input("Press enter to continue...")
+                    if create == 'yes':
+                        newPassword = input("Enter a password ")
+                        newUser(username, newPassword)
+                        print("Your account has been created succesfully!")
+                        passYes = True
+                    else:
+                        print("Ok going back to password enter screen...")
+            elif loginType == 1:
+                googleSignIn()
+        elif wifiConnect == False:
             while True:
                 try:
                     username = input("Enter username: ")
@@ -178,8 +264,6 @@ while True:
                     passYes = True
                 else:
                     print("Ok going back to password enter screen...")
-        elif loginType == 1:
-            googleSignIn()
 
     # Define operation numbers for responces.txt and other .txt file
     operationNames = {
@@ -516,7 +600,14 @@ while True:
 
     #Acos
     def acos(num1):
-        total = math.acos(num1)
+        time.sleep(5)
+        try:
+            total = math.acos(num1)
+        except:
+            print("Must be number between -1 and 1!")
+            input("Press enter to continue...")
+            time.sleep(0.25)
+            total = None
         return total
 
     #Atan
@@ -635,7 +726,12 @@ while True:
 
     #Enitre equation entering
     def fullEQ():
-        eq = input("What is your equation? ")
+        while True:
+            try:
+                eq = input("What is your equation? ")
+                break
+            except:
+                print("Please provice an equation!")
         total = 0
         try:
             total = eval(eq, {"__builtins__": None}, {"math": math})
@@ -978,24 +1074,20 @@ while True:
         
         clearShell()
 
-        
+        #Ask for operation
+        for key, func in operations.items():
+            name = operationNames.get(key, "Unknown operation")
+            print(f"Press {key} for {operationNames[key]}")
+            time.sleep(.25)
         while True:
-            
-            #Ask for operation
-            for key, func in operations.items():
-                name = operationNames.get(key, "Unknown operation")
-                print(f"Press {key} for {operationNames[key]}")
-                time.sleep(.25)
-            choice = int(input("Selection: "))
-            break
-            '''except:
-                print("Not an option!!!")
+            try:
+                choice = int(input("Selection: "))
+                break
+            except:
+                print("Not an awnser!")
                 time.sleep(2)
-                input("Press ENTER to continue....")
-                count = 0
-                while count < 100:
-                    print("\n")
-                    count += 1'''
+                input("Press enter to continue...")
+            codeRan = True
 
         #Only ask for numbers if there needed
         num2Needed = choice in(1,2,3,4,5,7,12,22,23,24,42,52)
@@ -1075,12 +1167,12 @@ while True:
             operation = operations.get(choice)
 
             # Only call with numbers if needed
-            if choice in (1,2,3,4,5,7,12,22,23,24):  # operations that need two numbers
+            if choice in (1,2,3,4,5,7,12,22,23,24):  #Operations that need two numbers
                 total = operations[choice](num1, num2)
-            elif choice in (6,8,9,10,11,13,14,15,16,17,18,19,20,21,25,26,27,28,29,31,32,33,34,35,36,37,38,40,49):
-                total = operations[choice](num1)  # operations that need one number
+            elif choice in (6,8,9,10,11,13,14,15,16,17,18,19,20,21,25,26,27,28,29,31,32,33,34,35,36,37,38,49):
+                total = operations[choice](num1)  #Operations that need one number
             else:
-                total = operations[choice]()  # operations that need no numbers
+                total = operations[choice]()  #Operations that need no numbers
 
                 operation_count[choice] += 1
             
@@ -1104,7 +1196,7 @@ while True:
             devSaveResult(num1, num2, choice, total)
 
             #Only count down if not viewing history or logging out
-            if choice not in(41,52):
+            if choice not in(39,41,52):
                 time.sleep(5)
                 countdownToSelection()
 
