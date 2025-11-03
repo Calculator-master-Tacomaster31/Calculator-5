@@ -1,62 +1,21 @@
-import requests
-import webbrowser
 import os
 import sys
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
 import random
 import time
 import math
-
-#Auto update
-CURRENT_VERSION = "V0.4.1"  #Version number
-
-#GITHUB RELEASES URL
-GITHUB_API_RELEASES = "https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest"
-
-def check_for_update():
-    try:
-        headers = {"User-Agent": "Calculator-Checker"}  # GitHub needs a user-agent
-        response = requests.get(GITHUB_API_RELEASES, headers=headers, timeout=10)
-        if response.status_code != 200:
-            print(f"Failed to fetch release info! Status code: {response.status_code}")
-            return
-        #Find newest version
-        data = response.json()
-        latest_version = data.get("tag_name")
-        if latest_version is None:
-            print("Could not determine latest version.")
-            return
-
-        #Check if current version is the same as the newest version
-        if latest_version != CURRENT_VERSION:
-            print(f"New version available: {latest_version} (You have {CURRENT_VERSION})")
-            while True:
-                try:
-                    choice = input("Do you want to open Github to download it? ").lower()
-                    break
-                except:
-                    print("Not an option!!!")
-                    time.sleep(2)
-                    input("Press enter to continue...")
-            if choice == "yes":
-                release_url = data.get("html_url")
-                if release_url:
-                    webbrowser.open(release_url)
-                else:
-                    print("ERROR!")
-        else:
-            print("You are running the latest version.")
-    except Exception as e:
-        print(f"Update check failed: {e}")
-
-    return
-
-
-
+import requests
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 global passYes, username
+
+# Clear shell
+def clearShell():
+    count = 0
+    while count < 100:
+        print("\n")
+        count += 1
 
 def google_sign_in():
     global passYes, username
@@ -69,57 +28,78 @@ def google_sign_in():
     creds = flow.run_local_server(
         port=0,
         authorization_prompt_message="",
-        )
-    id_info = id_token.verify_oauth2_token(creds.id_token, google_requests.Request())
-    email = id_info['email']
+    )
+    try:
+        id_info = id_token.verify_oauth2_token(creds.id_token, google_requests.Request())
+    except Exception as e:
+        print(f"Error:\n{e}")
+    try:
+        email = id_info['email']
+    except Exception as e:
+        print(f"Error:\n{e}")
     print(f"\nSuccessfully signed in as: {email}\n")
     username = email
     passYes = True
     return email
 
 def resource_path(relative_path):
-    #Get absolute path to resource, works for dev and PyInstaller exe
+    # Get absolute path to resource, works for dev and PyInstaller exe
     try:
+        # PyInstaller stores temp files in _MEIPASS
         base_path = sys._MEIPASS
     except AttributeError:
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-#Imports
+def check_for_update():
+    """Check GitHub releases for updates."""
+    try:
+        response = requests.get("https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest")
+        if response.status_code == 200:
+            latest_version = response.json()["tag_name"]
+            current_version = "V0.4.2"  # your local version
+            if latest_version != current_version:
+                print(f"New version {latest_version} available! (Your current version: {current_version})")
+                ask = input("Do you want to open the download page? (yes/no): ").lower()
+                if ask == "yes":
+                    os.startfile("https://github.com/Calculator-master-Tacomaster31/Calculator-5/releases/latest")
+                else:
+                    print("Continuing with current version...")
+                    input("Press enter to continue...")
+                    clearShell()
+            else:
+                print("You are using the latest version.")
+        else:
+            print(f"Failed to fetch release info! Status code: {response.status_code}")
+    except Exception as e:
+        print(f"Failed to check for updates: {e}")
+        input("Press enter to continue...")
 
-
-#Determine a writable path for users.txt
+# Determine a writable path for users.txt
 def get_user_data_path():
+    # Store next to the exe or script
     base_path = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
     return os.path.join(base_path, "users.txt")
 
-#Clear shell
-def clearShell():
-    count = 0
-    while count < 100:
-        print("\n")
-        count += 1
-
-#Set numbers
+# Set numbers
 num1 = 0
 num2 = 0
 
-#Log in
+# Log in
 while True:
-    #Define verable that desides if you are logged in or not
+    # Define variable that decides if you are logged in or not
     passYes = False
 
-    choice = None
-    #Code is approved by Malakai
-    if choice != 51:
-        print("This code is Malakai aproved as of 10/24/25!")
-        input("Press enter to continue...")
-        time.sleep(.5)
-        clearShell()
+    # Code is approved by Malakai
+    print("This code is Malakai aproved as of 10/24/25!")
+    input("Press enter to continue...")
+    time.sleep(.5)
+    clearShell()
 
     def googleSignIn():
         username = google_sign_in()
-    #Load users from text file
+
+    # Load users from text file
     def loadUsers():
         users = {}
         file_path = get_user_data_path()
@@ -132,21 +112,23 @@ while True:
             open(file_path, "w").close()
         return users
 
-    #Create new user
+    # Create new user
     def newUser(username, newPassword):
         file_path = get_user_data_path()
         with open(file_path, "a") as file:
             file.write(f"{username}:{newPassword}\n")
+
+    check_for_update()
+
     while passYes == False:
         users = loadUsers()
-        #Ask for username to login or signup
-        check_for_update()
-        clearShell()
-        try:
-            loginType = int(input("Press 1 for login with Google\nPress 2 for login with Username\nSelection: "))
-            break
-        except:
-            print("Not an option!")
+        # Ask for username to login or signup
+        while True:
+            try:
+                loginType = int(input("Press 1 for login with Google\nPress 2 for login with Username\nSelection: "))
+                break
+            except:
+                print("Not an option!")
         if loginType == 2:
             while True:
                 try:
@@ -157,7 +139,7 @@ while True:
                     time.sleep(2)
                     input("Press enter to continue...")
             if username in users:
-                #Enter password
+                # Enter password
                 while True:
                     try:
                         password = input("Enter your password ")
@@ -167,11 +149,11 @@ while True:
                         time.sleep(2)
                         input("Press enter to continue...")
                 if users[username] == password:
-                    print("Login SUCCESSFUL")
+                    print("Login SUSSESFULL")
                     passYes = True
                     time.sleep(2)
                 else:
-                    print("Login UNSUCCESSFUL")
+                    print("Login UNSSESFULL")
                     passYes = False
                     time.sleep(2)
                     count = 0
@@ -198,8 +180,8 @@ while True:
                     print("Ok going back to password enter screen...")
         elif loginType == 1:
             googleSignIn()
-            
-    #Define operation numbers for responces.txt and other .txt file
+
+    # Define operation numbers for responces.txt and other .txt file
     operationNames = {
         0: 'Leave',
         1: 'Add',
@@ -252,10 +234,12 @@ while True:
         48: 'ASCII art',
         49: 'prime Checker',
         50: 'jokes',
-        51: 'Check for Updates',
-        52: 'Sign out',
-        53: 'Signed In',
-        }
+        51: 'AI',
+        52: 'check for update',
+        53: 'Sign out',
+        54: 'Signed In',
+    }
+
 
     #Define verables
     start = 0
@@ -723,32 +707,43 @@ while True:
                 time.sleep(3.14)
             elif NumGuessGameIn != numGuessNum:
                 print("Your out of guesses!\nSorry you lost")
-        #Rock paper sisters
+
+        # Rock paper sisters
         elif gamein == 2:
-            RPSComputer = random.choice(['Rock', 'Paper', 'Sister'])
-            while True:
-                try:
-                    RPSUser = input("What would you like to use? ")
-                    break
-                except:
-                    print("Not an option!!!")
-            while RPSUser != 'rock' and RPSUser != 'paper' and RPSUser != 'sister' and RPSUser != 'cheat':
+            RPSComputer = random.choice(['rock', 'paper', 'sister'])
+
+            RPSUser = input("What would you like to use? ").lower()
+
+            while RPSUser not in ['rock', 'paper', 'sister', 'cheat']:
                 print("Not an option!!!\nMake sure you spelled your option correctly!")
-                while True:
-                    try:
-                        RPSUser = input("What would you like to use? ").lower()
-                        break
-                    except:
-                        print("Not an option!!!")
+                RPSUser = input("What would you like to use? ").lower()
+
+            # Cheat always wins
             if RPSUser == 'cheat':
-                print(RPSComputer)
-                RPSUser = RPSComputer
-            if RPSUser == RPSComputer:
+                print(f"Cheat activated! Computer chose: {RPSComputer}")
                 print("Good job!\nYou won!")
-                time.sleep(2)
-            elif RPSUser != RPSComputer:
-                print("Sorry, you lost!")
-                time.sleep(2)
+            else:
+                print(f"You chose: {RPSUser}")
+                print(f"Computer chose: {RPSComputer}")
+
+                if RPSUser == RPSComputer:
+                    print("It's a tie lol!")
+                elif RPSUser == 'rock' and RPSComputer == 'sister':
+                    print("Good job!\nYou won! lol")
+                elif RPSUser == 'sister' and RPSComputer == 'paper':
+                    print("Good job!\nYou won! lol")
+                elif RPSUser == 'paper' and RPSComputer == 'rock':
+                    print("Good job!\nYou won! lol")
+                else:
+                    print("Sorry, you lost!")
+                    print(f"Computer picked: {RPSComputer}")
+
+            time.sleep(2)
+
+        elif gamein == 3:
+            print("Hangman coming soon!")
+            time.sleep(5)
+
 
     #math quiz
     def mathQuiz():
@@ -794,8 +789,8 @@ while True:
     #memery wipe
     def memeryWipe():
         loading()
-        sure = input("Are you sure you want to wipe this calculator's memery?\n(Y or N)").lower()
-        if sure == 'y':
+        sure = input("Are you sure you want to wipe this calculator's memery?\n(Yes/No)").lower()
+        if sure == 'yes':
             try:
                 with open(resource_path("responces.txt"), "w") as file:
                     file.write("")
@@ -840,7 +835,7 @@ while True:
             print("ASCIIart.txt not found!")
             time.sleep(2)
 
-    def primeChecker(num1, num2):
+    def primeChecker(num1):
         num1 = int(float(num1))
         if num1 <= 1:
             print("False")
@@ -900,6 +895,10 @@ while True:
             print("Error!")
         time.sleep(5)
 
+    def AI():
+        print("AI is coming soon!")
+        time.sleep(5)
+
     def signedIn():
         print(f"{username} is currently logged in!")
         time.sleep(2)
@@ -957,9 +956,10 @@ while True:
         48: ASCIIart,
         49: primeChecker,
         50: jokes,
-        51: check_for_update,
-        52: signOut,
-        53: signedIn,
+        51: AI,
+        52: check_for_update,
+        53: signOut,
+        54: signedIn,
         }
 
     #Start all operation counters at 0
@@ -1002,8 +1002,8 @@ while True:
         num1NotNeeded = not choice in(0,30,39,40,45,46,47,48,50,52)
 
         #Make sure you enter proper number and ask for random numbers
-        if choice <= 53:
-            if choice != 0 and choice != 30 and choice != 39 and choice != 41 and choice != 42 and choice != 43 and choice != 44 and choice != 45 and choice != 46 and choice != 47 and choice != 48 and choice != 50 and choice != 51 and choice != 52:
+        if choice <= 54:
+            if choice not in(0,30,39,41,42,43,44,45,46,47,48,50,51,52,53,54):
                 if codeLooped == True:
                     while True:
                         try:
@@ -1045,7 +1045,7 @@ while True:
             countdownToSelection()
 
         #Ask for numbers
-        if choice <= 53:
+        if choice <= 54:
             if noNum == True:
                 def numberChoice(randomNumberChoice):
                     global num1, num2
@@ -1086,11 +1086,11 @@ while True:
             
 
             #Only clear screen if needed
-            if choice not in (30,46,45,44,43,42,47,48,49,50,51,52):
+            if choice not in (30,46,45,44,43,42,47,48,49,50,51,52,53,54):
                 clearShell()
 
             #Only ask if want to round/format and print total if needed
-            if choice not in(0,30,39,41,42,43,44,45,46,47,48,49,50,51,52):
+            if choice not in(0,30,39,41,42,43,44,45,46,47,48,49,50,51,52,53,54):
                 total = roufor(total)
                 print(total)
 
@@ -1104,7 +1104,7 @@ while True:
             devSaveResult(num1, num2, choice, total)
 
             #Only count down if not viewing history or logging out
-            if choice != 41 and choice != 52:
+            if choice not in(41,52):
                 time.sleep(5)
                 countdownToSelection()
 
