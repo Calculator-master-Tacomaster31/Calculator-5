@@ -57,7 +57,7 @@ def check_for_update():
         response = requests.get("https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest")
         if response.status_code == 200:
             latest_version = response.json()["tag_name"]
-            current_version = "V0.4.2"  # your local version
+            current_version = "V1.0.0"  # your local version
             if latest_version != current_version:
                 print(f"New version {latest_version} available! (Your current version: {current_version})")
                 ask = input("Do you want to open the download page? (yes/no): ").lower()
