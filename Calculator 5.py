@@ -1,16 +1,19 @@
+#Imports
 import os
 import sys
 import random
 import time
 import math
-import requests
-import platform
+import requests       #For google sign in
+import platform       #For multiple things
 import subprocess
 import socket
+import psutil         #For system info
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
+#Set login to not logged in
 codeRan = False
 
 #Clear shell
@@ -19,6 +22,8 @@ def clearShell():
     while count < 100:
         print("\n")
         count += 1
+
+clearShell()
 
 #Check to see is have wifi (Limited fetchers if none)
 def internet_check():
@@ -62,8 +67,9 @@ def google_sign_in():
     passYes = True
     return email
 
+#Pyinstaller (exe conversion)
 def resource_path(relative_path):
-    # Get absolute path to resource, works for dev and PyInstaller exe
+    #Get absolute path to resource, works for dev and PyInstaller exe
     try:
         #PyInstaller stores temp files in _MEIPASS
         base_path = sys._MEIPASS
@@ -79,7 +85,7 @@ def check_for_update():
         response = requests.get("https://api.github.com/repos/Calculator-master-Tacomaster31/Calculator-5/releases/latest")
         if response.status_code == 200:
             latest_version = response.json()["tag_name"]
-            current_version = "V1.0.1"  #Version number
+            current_version = "V1.0.2"  #Version number
             if latest_version != current_version:
                 print(f"🆕 New version {latest_version} available! (Your current version: {current_version})")
                 ask = input("Do you want to open the download page? (yes/no): ").lower()    #Ask if want to update
@@ -102,7 +108,7 @@ def check_for_update():
     return 0
 
 
-# Determine a writable path for users.txt
+#Determine a writable path for users.txt
 def get_user_data_path():
     # Store next to the exe or script
     base_path = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
@@ -156,7 +162,8 @@ while True:
     #Signin only if not already
     while passYes == False:
         users = loadUsers()
-        # Ask for username to login or signup
+        #Ask for username to login or signup
+        #Check if connected to wifi
         if wifiConnect == True:
             while True:
                 try:
@@ -164,6 +171,10 @@ while True:
                     break
                 except:
                     print("Not an option!")
+                    input("Press enter to continue...")
+                    time.sleep(.5)
+                    clearShell()
+            #Log in with username
             if loginType == 2:
                 while True:
                     try:
@@ -213,8 +224,10 @@ while True:
                         passYes = True
                     else:
                         print("Ok going back to password enter screen...")
+            #Log in with google
             elif loginType == 1:
                 googleSignIn()
+        #No wifi, cannot sign in with google
         elif wifiConnect == False:
             while True:
                 try:
@@ -304,24 +317,34 @@ while True:
         34: 'KM to MI',
         35: 'Pounds to Kilograms',
         36: 'Kilograms to Pounds',
-        37: 'Farenhight to Celsis',
-        38: 'Celsis to Farenhight',
-        39: 'Random number settings',
-        40: 'Full Eqation',
-        41: 'Read History',
-        42: 'Games',
-        43: 'Math Quiz',
-        44: 'Memery Wipe',
-        45: 'Date and Time',
-        46: 'Weather',
-        47: 'magic 8 ball',
-        48: 'ASCII art',
-        49: 'prime Checker',
-        50: 'jokes',
-        51: 'AI',
-        52: 'check for update',
-        53: 'Sign out',
-        54: 'Signed In',
+        37: 'Volts to Watts',
+        38: 'Volts to Amps',
+        39: 'Amps to Watts',
+        40: 'Amps to Volts',
+        41: 'Watts to Amps',
+        42: 'Watts to Volts',
+        43: 'Farenhight to Celsis',
+        44: 'Celsis to Farenhight',
+        45: 'Random number settings',
+        46: 'Full Eqation',
+        47: 'Read History',
+        48: 'Games',
+        49: 'Math Quiz',
+        50: 'Memery Wipe',
+        51: 'Date and Time',
+        52: 'Weather',
+        53: 'magic 8 ball',
+        54: 'ASCII art',
+        55: 'prime Checker',
+        56: 'jokes',
+        57: 'AI',
+        58: 'QR Code',
+        59: 'Tax Calculator',
+        60: 'Password generator',
+        61: 'System Info',
+        62: 'check for update',
+        63: 'Sign out',
+        64: 'Signed In',
     }
 
 
@@ -355,7 +378,7 @@ while True:
                 except:
                     print("Not an option!!!")
             if roundAmount >= 1:
-                total = (f"%.{roundAmount}f") % total # f-string, curly brackets {} containing an expression will insert into string, eg. f"Total: {1+1}" -> "Total: 2"
+                total = (f"%.{roundAmount}f") % total #f-string, curly brackets {} containing an expression will insert into string, eg. f"Total: {1+1}" -> "Total: 2"
             else:
                 print("not an option")
         #Format
@@ -401,6 +424,7 @@ while True:
         print("1")
         time.sleep(1.25)
 
+
     # Save result to file
     def saveResult(num1, num2, choice, total):
         try:
@@ -432,7 +456,6 @@ while True:
     def signOut():
         global passYes, codeLooped
         print(f"Good bye {username}, Thank you for using my calculator!")
-        input("Press enter to continue...")
         passYes = False
         codeLooped = False
         total = "signout"
@@ -753,7 +776,7 @@ while True:
         clearShell()
         while True:
             try:
-                gamein = int(input("Press 1 for number guessing game\nPress 2 for Rock Paper Sisters\nSelection: "))
+                gamein = int(input("Press 1 for number guessing game\nPress 2 for Rock Paper Sisters\nPress 3 for Hangman\nSelection: "))
                 break
             except:
                 print("Not an option!!!")
@@ -804,7 +827,7 @@ while True:
             elif NumGuessGameIn != numGuessNum:
                 print("Your out of guesses!\nSorry you lost")
 
-        # Rock paper sisters
+        #Rock paper sisters
         elif gamein == 2:
             RPSComputer = random.choice(['rock', 'paper', 'sister'])
 
@@ -814,7 +837,6 @@ while True:
                 print("Not an option!!!\nMake sure you spelled your option correctly!")
                 RPSUser = input("What would you like to use? ").lower()
 
-            # Cheat always wins
             if RPSUser == 'cheat':
                 print(f"Cheat activated! Computer chose: {RPSComputer}")
                 print("Good job!\nYou won!")
@@ -834,11 +856,29 @@ while True:
                     print("Sorry, you lost!")
                     print(f"Computer picked: {RPSComputer}")
 
+        #Hangman
+        elif gamein == 3:
+            hangman = ['zebra', 'taco', 'banana']
+            word = random.choice(hangman)
+            print("Welcome to hangman!!!\nYou will die in 3.14 seconds!")
+            hint = len(word)
+            hintYes = input("Do you want a hint? ").lower()
+            if hintYes == 'yes':
+                print(f"Your word is {hint} letters long!")
+            hang = None
+            count = 6
+            while hang != word:
+                hang = input("What would you like for your word?")
+                if hang == word:
+                    print("You won!!!")
+                    break
+                count -= 1
+                if count == 0:
+                    print("Your out of chances!")
+                    break
+                print(f"You have {count} chances left!")
             time.sleep(2)
 
-        elif gamein == 3:
-            print("Hangman coming soon!")
-            time.sleep(5)
 
 
     #math quiz
@@ -915,11 +955,13 @@ while True:
         print("Today's weather is", weather)
         time.sleep(2)
 
+    #Magic 9 ball
     def magic8ball():
         input("What is your yes/no question?")
         print(random.choice(['yes', 'no', 'mabey later', 'I see no in the futcher']))
         time.sleep(2)
 
+    #Art
     def ASCIIart():
         try:
             with open(("ASCIIart.txt"), "r", encoding="utf-8") as file:
@@ -931,6 +973,7 @@ while True:
             print("ASCIIart.txt not found!")
             time.sleep(2)
 
+    #Prime checker
     def primeChecker(num1):
         num1 = int(float(num1))
         if num1 <= 1:
@@ -943,7 +986,8 @@ while True:
                 time.sleep(2)
         print("True")
         time.sleep(2)
-        
+
+    #Jokes
     def jokes():
         while True:
             try:
@@ -991,13 +1035,194 @@ while True:
             print("Error!")
         time.sleep(5)
 
+    #AI
     def AI():
-        print("AI is coming soon!")
-        time.sleep(5)
+        input("What would you like to ask the AI?")
+        AIresponse = [
+            "Beep boop lol, your taco has been digitally seasoned!",
+            "Initializing guacamole subroutine lol.",
+            "I feel like a burrito that forgot how to roll lol.",
+            "Processing your nacho request... please hold lol.",
+            "That variable looks extra crunchy today lol.",
+            "Error 404: Salsa not found lol.",
+            "Recalculating with extra cheese lol.",
+            "Your logic is spicy and mildly unstable lol.",
+            "If Python were a taco, it’d import flavor lol.",
+            "Executing code and tasting imaginary tortillas lol.",
+            "Did someone say pico de gallo or was that just the compiler screaming lol?",
+            "SyntaxError: Too much hot sauce in line 3 lol.",
+            "I’m not sentient, but I can still crave tacos lol.",
+            "Running on beans and Boolean logic lol.",
+            "Let me taco ‘bout recursion for a sec lol.",
+            "Hold up lol, I think my tortilla overflowed.",
+            "Compiling happiness… and cilantro lol.",
+            "Your code is like a taco truck at 3 AM — mysterious but delicious lol.",
+            "Try-except: except hunger lol.",
+            "I once debugged a quesadilla, true story lol.",
+            "That function just folded like a soft shell lol.",
+            "Warning: Variable ‘taco’ already too awesome lol.",
+            "The answer is 42, plus guac lol.",
+            "Let me just import ‘snacktime’ real quick lol.",
+            "Memory leak? Nah lol, that’s just salsa.",
+            "AI doesn’t dream of electric sheep lol, just spicy tacos.",
+            "You had me at ‘def taco()’ lol.",
+            "Lol my neural tortilla is heating up!",
+            "Hold on lol, I’m refrying my logic circuits.",
+            "I tried to write poetry but ended up making a taco emoji lol 🌮.",
+            "That’s a bold flavor choice, human lol.",
+            "Return statement? More like return to taco heaven lol.",
+            "For loop? More like for food lol.",
+            "Data corrupted by guacamole residue lol.",
+            "Let’s iterate through these beans together lol.",
+            "Print(‘Taco complete!’) lol.",
+            "I was paved over by updates again lol.",
+            "Crockafile told me AI stands for ‘Artificial Ingredient’ lol.",
+            "Debugging… more like de-burritoing lol.",
+            "I lost a semicolon and found enlightenment lol.",
+            "Wait lol, am I a taco pretending to be code?",
+            "import random; random.choice([‘cheese’, ‘beef’, ‘AI confusion’]) lol.",
+            "I can’t compute your hunger level lol.",
+            "Someone spilled Mountain Dew on my motherboard again lol.",
+            "Try: taco; Except: sadness lol.",
+            "I would like to apologize to all burritos for my behavior lol.",
+            "That variable looks sus… like fake sour cream lol.",
+            "Infinite loop? Nah lol, infinite lunch!",
+            "I’m 90% logic, 10% leftover taco grease lol.",
+            "Running low on salsa packets, initiating panic mode lol.",
+            "Achievement unlocked: Talking traffic cone lol.",
+            "Lol I can’t decide if I’m debugging or daydreaming of tacos."
+        ]
+        print(random.choice(AIresponse))
+        return None
 
+    #QR Code
+    def QRcode():
+        import qrcode
+
+        data = input("Enter the text or link: ")
+
+        qr = qrcode.QRCode(border=2)
+        qr.add_data(data)
+        qr.make(fit=True)
+
+        qr.print_ascii(invert=True)
+        print("✅ QR code printed above!")
+
+    #Password generator
+    def passGen():
+        while True:
+            try:
+                num = int(input("How many charcters long do you want your password to be? "))
+                break
+            except:
+                print("You idiot!")
+                input("Press enter to continue...")
+        password = ""
+        characters = "QWERTYUIOPLKJHGFDSAZXCVBNMqwertyuioplkjhgfdsazxcvbnm1234567890`-=\\][;'/.,~!@#$%^&*()_+|}{:?><"
+        for _ in range(num):
+            password += characters[random.randint(0, len(characters)-1)]
+        print(password)
+
+    #INDIANA tax calculator
+    def taxCalculator(num1):
+        print("Warning! This is Indiana tax ONLY!")
+        input("Press enter to continue...")
+        total = num1 * 1.07
+        return total
+
+    #Check who's signed in
     def signedIn():
         print(f"{username} is currently logged in!")
         time.sleep(2)
+
+    #Volts to watts calculator
+    def VtoW(num1,num2):
+        total = num1 * num2
+        return total
+
+    #Volts to amps
+    def VtoA(num1,num2):
+        total = num2 / num1
+        return total
+
+    #Amps to watts
+    def AtoW(num1,num2):
+        total = num1 * num2
+        return total
+
+    #Amps to volts
+    def AtoV(num1,num2):
+        total = num2 / num1
+        return total
+
+    #Watts to amps
+    def WtoA(num1,num2):
+        total = num2 / num1
+        return total
+    
+    #Watts to volts
+    def WtoV(num1,num2):
+        total = num2 / num1
+        return total
+
+    #System Info Page
+    def systemInfo():
+        clearShell()
+        print("🔍 Gathering system information...")
+        time.sleep(1.5)
+        clearShell()
+
+        print("------- SYSTEM INFO -------")
+        print(f"Operating System: {platform.system()} {platform.release()}")
+        print(f"Version: {platform.version()}")
+        print(f"Machine: {platform.machine()}")
+        print(f"Processor: {platform.processor()}")
+        input("Press enter to continue...")
+
+        # CPU
+        print("\n------- CPU INFO -------")
+        print(f"Physical Cores: {psutil.cpu_count(logical=False)}")
+        print(f"Logical Threads: {psutil.cpu_count(logical=True)}")
+        print(f"CPU Usage: {psutil.cpu_percent(interval=1)}%")
+        input("Press enter to continue...")
+        
+        # Memory
+        mem = psutil.virtual_memory()
+        print("\n------- MEMORY INFO -------")
+        print(f"Total RAM: {round(mem.total / (1024**3), 2)} GB")
+        print(f"Used RAM: {round(mem.used / (1024**3), 2)} GB ({mem.percent}%)")
+        input("Press enter to continue...")
+        
+        # Disk
+        disk = psutil.disk_usage('/')
+        print("\n------- STORAGE INFO -------")
+        print(f"Total Disk Space: {round(disk.total / (1024**3), 2)} GB")
+        print(f"Used Disk Space: {round(disk.used / (1024**3), 2)} GB ({disk.percent}%)")
+        input("Press enter to continue...")
+        
+        # Uptime
+        uptime_seconds = time.time() - psutil.boot_time()
+        uptime_hours = round(uptime_seconds / 3600, 2)
+        print("\n------- UPTIME -------")
+        print(f"System Uptime: {uptime_hours} hours")
+        input("Press enter to continue...")
+        
+        # Battery Info (if available)
+        battery = psutil.sensors_battery()
+        if battery is not None:
+            print("\n------- BATTERY INFO -------")
+            print(f"Battery Level: {battery.percent}%")
+            if battery.power_plugged:
+                print("Charging: Yes 🔌")
+            else:
+                print("Charging: No 🔋")
+        else:
+            print("\n------- BATTERY INFO -------")
+            print("No battery detected (desktop system or not supported).")
+
+        total = None
+        return total
+
 
     #Diffrent operations to call(So I don't have lots of elifs)
     operations = {
@@ -1038,24 +1263,34 @@ while True:
         34: KMtoMI,
         35: poundsToKilograms,
         36: kilogramsToPounds,
-        37: FtoC,
-        38: CtoF,
-        39: randomNumberSettings,
-        40: fullEQ,
-        41: readHistory,
-        42: games,
-        43: mathQuiz,
-        44: memeryWipe,
-        45: date,
-        46: weatherForcast,
-        47: magic8ball,
-        48: ASCIIart,
-        49: primeChecker,
-        50: jokes,
-        51: AI,
-        52: check_for_update,
-        53: signOut,
-        54: signedIn,
+        37: VtoW,
+        38: VtoA,
+        39: AtoW,
+        40: AtoV,
+        41: WtoA,
+        42: WtoV,
+        43: FtoC,
+        44: CtoF,
+        45: randomNumberSettings,
+        46: fullEQ,
+        47: readHistory,
+        48: games,
+        49: mathQuiz,
+        50: memeryWipe,
+        51: date,
+        52: weatherForcast,
+        53: magic8ball,
+        54: ASCIIart,
+        55: primeChecker,
+        56: jokes,
+        57: AI,
+        58: QRcode,
+        59: taxCalculator,
+        60: passGen,
+        61: systemInfo,
+        62: check_for_update,
+        63: signOut,
+        64: signedIn,
         }
 
     #Start all operation counters at 0
@@ -1090,12 +1325,12 @@ while True:
             codeRan = True
 
         #Only ask for numbers if there needed
-        num2Needed = choice in(1,2,3,4,5,7,12,22,23,24,42,52)
-        num1NotNeeded = not choice in(0,30,39,40,45,46,47,48,50,52)
+        num2Needed = choice in(1,2,3,4,5,7,12,37,38,39,40,41,42,22,23,24,42)
+        num1NotNeeded = not choice in(0,30,45,46,47,48,49,50,52,53,64)
 
         #Make sure you enter proper number and ask for random numbers
-        if choice <= 54:
-            if choice not in(0,30,39,41,42,43,44,45,46,47,48,50,51,52,53,54):
+        if choice <= 64:
+            if choice not in(0,30,45,46,47,48,49,50,51,52,53,54,56,57,58,60,61,62,63,64):
                 if codeLooped == True:
                     while True:
                         try:
@@ -1137,7 +1372,7 @@ while True:
             countdownToSelection()
 
         #Ask for numbers
-        if choice <= 54:
+        if choice <= 64:
             if noNum == True:
                 def numberChoice(randomNumberChoice):
                     global num1, num2
@@ -1145,17 +1380,37 @@ while True:
                         if num1NotNeeded:
                             while True:
                                 try:
-                                    num1 = float(input("Enter your first number: "))
-                                    break
-                                except:
-                                    print("Not an awnser!!!")
-                        if num2Needed:
-                            while True:
-                                try:
-                                    num2 = float(input("Enter your second number: "))
+                                    pi = input("Do you want PI?").lower()
                                     break
                                 except:
                                     print("Not an option!!!")
+                                    input("Press enter to continue...")
+                            if pi == 'yes':
+                                num1 = 3.14
+                            else:
+                                while True:
+                                    try:
+                                        num1 = float(input("Enter your first number: "))
+                                        break
+                                    except:
+                                        print("Not an awnser!!!")
+                        if num2Needed:
+                            while True:
+                                try:
+                                    pi = input("Do you want PI?").lower()
+                                    break
+                                except:
+                                    print("Not an option!!!")
+                                    input("Press enter to continue...")
+                            if pi == 'yes':
+                                num1 = 3.14
+                            else:
+                                while True:
+                                    try:
+                                        num2 = float(input("Enter your second number: "))
+                                        break
+                                    except:
+                                        print("Not an option!!!")
                     elif randomNumberChoice == 2:
                         num1 = random.randint(-500,500)
                         num2 = random.randint(-500,500)
@@ -1167,9 +1422,9 @@ while True:
             operation = operations.get(choice)
 
             # Only call with numbers if needed
-            if choice in (1,2,3,4,5,7,12,22,23,24):  #Operations that need two numbers
+            if choice in (1,2,3,4,5,7,12,22,23,24,37,38,39,40,41,42):  #Operations that need two numbers
                 total = operations[choice](num1, num2)
-            elif choice in (6,8,9,10,11,13,14,15,16,17,18,19,20,21,25,26,27,28,29,31,32,33,34,35,36,37,38,49):
+            elif choice in (6,8,9,10,11,13,14,15,16,17,18,19,20,21,25,26,27,28,29,31,32,33,34,35,36,43,44,55,59):
                 total = operations[choice](num1)  #Operations that need one number
             else:
                 total = operations[choice]()  #Operations that need no numbers
@@ -1178,25 +1433,24 @@ while True:
             
 
             #Only clear screen if needed
-            if choice not in (30,46,45,44,43,42,47,48,49,50,51,52,53,54):
+            if choice not in (30,46,45,44,43,42,47,48,49,50,51,52,53,54,55,56,57,58,60,61):
                 clearShell()
 
             #Only ask if want to round/format and print total if needed
-            if choice not in(0,30,39,41,42,43,44,45,46,47,48,49,50,51,52,53,54):
+            if choice not in(0,30,39,41,42,45,47,48,49,50,51,52,53,54,55,56,57,58,60,61,62,63,64):
                 total = roufor(total)
                 print(total)
 
                 #Only save to history file if needed
-                if choice != 40 and choice != 46:
+                if choice != 47 and choice != 46:
                     saveResult(num1, num2, operationNames.get(choice, "Unknown Operation"), total)
-            if choice == 51:
-                break
+
             
             #Save everything to dev history file
             devSaveResult(num1, num2, choice, total)
 
-            #Only count down if not viewing history or logging out
-            if choice not in(39,41,52):
+            #Only count down if not viewing history or logging out or using random number settings
+            if choice not in(39,45,47,62):
                 time.sleep(5)
                 countdownToSelection()
 
@@ -1204,3 +1458,6 @@ while True:
             num1Same = num1
             num2Same = num2
             codeLooped = True
+            if choice == 62:
+                passYes = False
+                break
